@@ -9,11 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LIDGREN_VERSION: '1.7.3.${{ github.run_number }}'
-    outputs:
-      debug_nupkg: ${{ steps.build_debug.outputs.nupkg }}
-      debug_snupkg: ${{ steps.build_debug.outputs.snupkg }}
-      release_nupkg: ${{ steps.build_release.outputs.nupkg }}
-      release_snupkg: ${{ steps.build_release.outputs.snupkg }}
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
@@ -24,24 +19,24 @@ jobs:
       run: dotnet restore
     - id: build_debug
       name: Build (Debug)
-      run: |
-        dotnet build --no-restore --configuration Debug -p:VersionPrefix=$LIDGREN_VERSION --version-suffix debug
-        echo "::set-output name=nupkg::Lidgren.Network/bin/Debug/AscensionGameDev.Lidgren.Network.$LIDGREN_VERSION-debug.nupkg"
-        echo "::set-output name=snupkg::Lidgren.Network/bin/Debug/AscensionGameDev.Lidgren.Network.$LIDGREN_VERSION-debug.snupkg"
+      run: dotnet build --no-restore --configuration Debug -p:VersionPrefix=$LIDGREN_VERSION --version-suffix debug
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - id: build_release
       name: Build (Release)
-      run: |
-        dotnet build --no-restore --configuration Release -p:VersionPrefix='1.7.3.${{ github.run_number }}'
-        echo "::set-output name=nupkg::Lidgren.Network/bin/Release/AscensionGameDev.Lidgren.Network.$LIDGREN_VERSION.nupkg"
-        echo "::set-output name=snupkg::Lidgren.Network/bin/Release/AscensionGameDev.Lidgren.Network.$LIDGREN_VERSION.snupkg"
-
-  publish:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Publish Release
-        run: dotnet nuget push ${{needs.build.outputs.release_nupkg}} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}
-      - name: Publish Debug
-        run: dotnet nuget push ${{needs.build.outputs.debug_nupkg}} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}'
+      run: dotnet build --no-restore --configuration Release -p:VersionPrefix=$LIDGREN_VERSION
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2.2.1
+      with:
+        name: Lidgren.Network.${{ env.LIDGREN_VERSION }}
+        path: Lidgren.Network/bin/*/*.*nupkg
+        if-no-files-found: error
+        retention-days: 1
+#   publish:
+#     runs-on: ubuntu-latest
+#     needs: build
+#     steps:
+#       - name: Publish Release
+#         run: dotnet nuget push ${{needs.build.outputs.release_nupkg}} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}
+#       - name: Publish Debug
+#         run: dotnet nuget push ${{needs.build.outputs.debug_nupkg}} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}'
