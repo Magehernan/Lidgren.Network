@@ -26,13 +26,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Dump version
-        run: echo '1.7.${{ GITHUB_RUN_ID }}'
+        run: echo '1.7.${{ env.GITHUB_RUN_ID }}'
       - name: Dump fake secret
         run: echo ${{ secrets.FAKE_SECRET }}
       - name: Dump GITHUB_RUN_NUMBER
-        run: echo ${{ GITHUB_RUN_NUMBER }}
+        run: echo ${{ env.GITHUB_RUN_NUMBER }}
       - name: Dump workflow name
-        run: echo ${{ GITHUB_WORKFLOW }}
+        run: echo ${{ env.GITHUB_WORKFLOW }}
 #       - name: Publish NuGet.org
 #         uses: brandedoutcast/publish-nuget@v2.5.5
 #         with:
