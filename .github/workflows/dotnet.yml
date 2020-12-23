@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LIDGREN_VERSION: '1.7.3.${{ github.run_number }}'
+    outputs:
+      debug_nupkg: ${{ steps.build_debug.outputs.nupkg }}
+      debug_snupkg: ${{ steps.build_debug.outputs.snupkg }}
+      release_nupkg: ${{ steps.build_release.outputs.nupkg }}
+      release_snupkg: ${{ steps.build_release.outputs.snupkg }}
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
@@ -31,5 +36,12 @@ jobs:
         dotnet build --no-restore --configuration Release -p:VersionPrefix='1.7.3.${{ github.run_number }}'
         echo "::set-output name=nupkg::bin/Release/AscensionGameDev.Lidgren.Network.$LIDGREN_VERSION.nupkg"
         echo "::set-output name=snupkg::bin/Release/AscensionGameDev.Lidgren.Network.$LIDGREN_VERSION.snupkg"
-    - run: echo "${{ toJSON(steps.build_debug.outputs) }}"
-    - run: echo "${{ toJSON(steps.build_release.outputs) }}"
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Publish Release
+        run: dotnet nuget push ${{needs.build.outputs.release_nupkg}} -k ${{ secrets.LIDGREN_NUGET_API_KEY }}
+      - name: Publish Debug
+        run: dotnet nuget push ${{needs.build.outputs.debug_nupkg}} -k ${{ secrets.LIDGREN_NUGET_API_KEY }}'
