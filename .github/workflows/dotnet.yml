@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
@@ -16,28 +15,21 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build (Debug)
-      run: dotnet build --no-restore --configuration Debug
-    - name: Build (Release)
-      run: dotnet build --no-restore --configuration Release
+    - id: build_debug
+      name: Build (Debug)
+      run: dotnet build --no-restore --configuration Debug -p:VersionPrefix='1.7.3.${{ github.run_number }}' --version-suffix debug
     - name: Test
       run: dotnet test --no-build --verbosity normal
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump version
-        run: echo '1.7.${{ github.run_id }}'
-      - name: Dump fake secret
-        run: echo ${{ secrets.FAKE_SECRET }}
-      - name: Dump GITHUB_RUN_NUMBER
-        run: echo ${{ github.run_number }}
-      - name: Dump workflow name
-        run: echo ${{ github.workflow }}
-      - name: Dump job id
-        run: echo ${{ github.job }}
-#       - name: Publish NuGet.org
-#         uses: brandedoutcast/publish-nuget@v2.5.5
-#         with:
-#           PROJECT_FILE_PATH: ./Lidgren.Network/Lidgren.Network.csproj
-#           NUGET_KEY: ${{ secrets.LIDGREN_NUGET_API_KEY }}
-#           VERSION_STATIC: '1.7.${GITHUB_RUN_ID}'
+    - id: build_release
+      name: Build (Release)
+      run: dotnet build --no-restore --configuration Release -p:VersionPrefix='1.7.3.${{ github.run_number }}' 
+    - run: echo "${{ toJSON(steps.build_debug.outputs) }}"
+    - run: echo "${{ toJSON(steps.build_release.outputs) }}"
+#   publish:
+#     runs-on: ubuntu-latest
+#     needs: build
+#     steps:
+#       - name: Publish Release
+#         run: dotnet nuget push "bin/Release/*.nupkg" -k ${{ secrets.LIDGREN_NUGET_API_KEY }}
+#       - name: Publish Debug
+#         run: dotnet nuget push "bin/Debug/*.nupkg" -k ${{ secrets.LIDGREN_NUGET_API_KEY }}'
