@@ -45,6 +45,6 @@ jobs:
         with:
           name: '${{ needs.build.outputs.artifact_name }}'
       - name: Publish Release
-        run: dotnet nuget push '${{ needs.build.outputs.nupkg_base_name }}.nupkg' --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}
+        run: dotnet nuget push 'Release/${{ needs.build.outputs.nupkg_base_name }}.nupkg' --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}
       - name: Publish Debug
-        run: dotnet nuget push '${{ needs.build.outputs.nupkg_base_name }}-debug.nupkg' --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}'
+        run: dotnet nuget push 'Debug/${{ needs.build.outputs.nupkg_base_name }}-debug.nupkg' --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.LIDGREN_NUGET_API_KEY }}'
